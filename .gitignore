@@ -53,3 +53,8 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# Project specific
+test
+asm-offset.h
+asm-offset.s
