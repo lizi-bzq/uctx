@@ -1,6 +1,7 @@
 #include "uctx.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 /* ---- test 1: float register pressure ---- */
 static char sf1[8192], sf2[8192];
@@ -92,6 +93,58 @@ static int test_errors(void)
     return 0;
 }
 
+/* ---- test 5: context switch performance (5 second run) ---- */
+static char sp1[8192], sp2[8192];
+static struct uctx pc1, pc2, pm;
+static volatile unsigned long long perf_cnt;
+static volatile int perf_stop;
+
+static void perf_pong(void *arg)
+{
+    while (!perf_stop)
+        swapuctx(&pc2, &pc1);
+    swapuctx(&pc2, &pm);
+}
+
+static void perf_ping(void *arg)
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    long long deadline = ts.tv_sec + 5;
+    unsigned long long batch = 0;
+
+    while (1) {
+        batch++;
+        swapuctx(&pc1, &pc2);
+        if ((batch & 0xffff) == 0) {
+            clock_gettime(CLOCK_MONOTONIC, &ts);
+            if (ts.tv_sec >= deadline) break;
+        }
+    }
+    perf_cnt = batch;
+    perf_stop = 1;
+    swapuctx(&pc1, &pm);
+}
+
+static void test_perf(void)
+{
+    pc1.stack.ss_sp = sp1; pc1.stack.ss_size = sizeof(sp1); pc1.uc_link = NULL;
+    pc2.stack.ss_sp = sp2; pc2.stack.ss_size = sizeof(sp2); pc2.uc_link = NULL;
+    makeuctx(&pc1, perf_ping, NULL);
+    makeuctx(&pc2, perf_pong, NULL);
+
+    struct timespec t0, t1;
+    clock_gettime(CLOCK_MONOTONIC, &t0);
+    swapuctx(&pm, &pc1);
+    clock_gettime(CLOCK_MONOTONIC, &t1);
+
+    unsigned long long n = perf_cnt;
+    double elapsed = (t1.tv_sec - t0.tv_sec) + (t1.tv_nsec - t0.tv_nsec) / 1e9;
+    printf("PERF: %.2f M switches/sec (%llu switches in %.3fs)\n",
+           n / elapsed / 1e6, n, elapsed);
+}
+
+
 /* ---- runner ---- */
 int main(void)
 {
@@ -108,6 +161,8 @@ int main(void)
 
     if (test_errors())   { printf("FAIL: errors\n");   fail |= 8; }
     else                   printf("PASS: errors\n");
+
+    test_perf();
 
     return fail;
 }
