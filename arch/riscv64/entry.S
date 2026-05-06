@@ -12,9 +12,13 @@ __swapuctx:
         integer: ra, s0-s11 = 13 × 8B = 104B
         fp:      fs0-fs11  = 12 × 8B = 96B
         padding: 8B (align FP area to 16B)
-        total: 208B → rounded to 240B (push + pad)
+        total: 208B
+
+        Upper block (func/arg/ctx/uctx_exit) sits above
+        the callee-saved area and is accessed by __start_uctx
+        after addi sp,208.
     */
-    addi sp, sp, -240
+    addi sp, sp, -208
 
     sd ra, 0(sp)
     sd s0, 8(sp)
@@ -77,7 +81,7 @@ __swapuctx:
     ld s0, 8(sp)
     ld ra, 0(sp)
 
-    addi sp, sp, 240
+    addi sp, sp, 208
 
     ret
 

@@ -15,7 +15,7 @@ int makeuctx(struct uctx *ctx, void (*func)(void *), void *arg)
     /*
         Stack layout (high addr to low addr, push order):
 
-        After __swapuctx restore + addi sp,240:
+        After __swapuctx restore + addi sp,208:
 
           0(sp)  = func ptr
           8(sp)  = arg
