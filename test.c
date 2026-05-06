@@ -3,9 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <sys/cdefs.h>
 #include <time.h>
-#include <ucontext.h>
 
 struct uctx ctx1;
 struct uctx main_ctx;

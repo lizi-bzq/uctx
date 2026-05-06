@@ -1,9 +1,5 @@
-#define _GNU_SOURCE
 #include "uctx.h"
-#include <pthread.h>
-#include <stdio.h>
-#include <time.h>
-#include <ucontext.h>
+#include "nostdc.h"
 
 extern void __swapuctx(unsigned long *, unsigned long *) __attribute__((visibility("hidden")));
 

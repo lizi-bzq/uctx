@@ -8,6 +8,11 @@ ARCH ?= $(shell $(CC) -dumpmachine | cut -d- -f1)
 
 ARCH_DIR := arch/$(ARCH)
 
+# armhf shares the same arch/ directory with arm (ABI differs only in target triple)
+ifeq ($(ARCH),armhf)
+ARCH_DIR := arch/arm
+endif
+
 # Object files in arch-specific subdirectory to avoid cross-contamination
 C_SRCS = $(ARCH_DIR)/uctx.c
 C_SRCS += $(ARCH_DIR)/makectx.c
@@ -32,14 +37,20 @@ endif
 ifeq ($(ARCH),mipsel)
 TARGET := --target=mipsel-linux-gnu
 endif
+ifeq ($(ARCH),arm)
+TARGET := --target=arm-linux-gnueabi
+endif
+ifeq ($(ARCH),armhf)
+TARGET := --target=arm-linux-gnueabihf
+endif
 
 # libuctx.so is built with -nostdlib to have zero external dependencies.
-# For cross-compilation targets, also use -nostdinc with minimal stubs.
+# For cross-compilation targets, also use -nostdinc (types from nostdc.h).
 NATIVE_ARCH := $(shell $(CC) -dumpmachine | cut -d- -f1)
 ifdef TARGET
 ifneq ($(ARCH),$(NATIVE_ARCH))
-# Cross-compilation: use minimal stubs instead of native libc headers
-CFLAGS += -nostdinc -isystem include -isystem $(shell $(CC) -print-resource-dir)/include
+# Cross-compilation: use nostdc.h instead of native libc headers
+CFLAGS += -nostdinc -isystem $(shell $(CC) -print-resource-dir)/include
 endif
 endif
 
@@ -48,7 +59,7 @@ SO_CFLAGS = $(CFLAGS) -fPIC
 SO_LDFLAGS = -s -flto -fPIC -nostdlib -nodefaultlibs
 
 # test program flags: use normal libc
-TEST_CFLAGS = $(CFLAGS)
+TEST_CFLAGS = -O2 -I. -I$(ARCH_DIR)
 TEST_LDFLAGS = -L. -luctx -Wl,-rpath=.
 
 .PHONY: all
@@ -74,7 +85,7 @@ $(ARCH_DIR)/entry.o: $(ARCH_DIR)/entry.S $(ARCH_DIR)/asm-offset.h
 $(ARCH_DIR)/asm-offset.h: $(ARCH_DIR)/asm-offset.s
 	@$(call cmd_offsets)
 
-$(ARCH_DIR)/asm-offset.s: $(ARCH_DIR)/asm-offset.c uctx.h
+$(ARCH_DIR)/asm-offset.s: asm-offset.c uctx.h
 	$(CC) $(TARGET) $(SO_CFLAGS) -S $< -o $@
 
 define cmd_offsets

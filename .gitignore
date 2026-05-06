@@ -60,4 +60,3 @@ asm-offset.h
 asm-offset.s
 arch/*/asm-offset.h
 arch/*/asm-offset.s
-arch/mipsel
