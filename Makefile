@@ -43,6 +43,13 @@ endif
 ifeq ($(ARCH),armhf)
 TARGET := --target=arm-linux-gnueabihf
 endif
+ifeq ($(ARCH),riscv64)
+TARGET := --target=riscv64-linux-gnu
+endif
+ifeq ($(ARCH),i386)
+TARGET := --target=i386-linux-gnu
+CFLAGS += -m32
+endif
 
 # libuctx.so is built with -nostdlib to have zero external dependencies.
 # For cross-compilation targets, also use -nostdinc (types from nostdc.h).
@@ -62,8 +69,16 @@ SO_LDFLAGS = -s -flto -fPIC -nostdlib -nodefaultlibs
 TEST_CFLAGS = -O2 -I. -I$(ARCH_DIR)
 TEST_LDFLAGS = -L. -luctx -Wl,-rpath=.
 
+# Zero-dependency test: no libc, uses syscall.h raw syscalls
+TEST0_CFLAGS = -O2 -I. -I$(ARCH_DIR) -nostdinc -isystem $(shell $(CC) -print-resource-dir)/include
+TEST0_LDFLAGS = -L. -luctx -Wl,-rpath=. -nodefaultlibs
+
 .PHONY: all
 all: libuctx.so test
+
+.PHONY: test0
+test0: test0.c libuctx.so
+	$(CC) $(TARGET) $(TEST0_CFLAGS) $(TEST0_LDFLAGS) -o $@ $<
 
 libuctx.so: $(C_OBJS)
 	$(LD) $(TARGET) -shared $(SO_LDFLAGS) -o $@ $^
@@ -100,7 +115,7 @@ endef
 
 .PHONY: clean
 clean:
-	rm -f test
+	rm -f test test0
 	rm -f *.out
 	rm -f *.so
 	rm -f asm-offset.h
@@ -110,7 +125,7 @@ clean:
 
 .PHONY: distclean
 distclean:
-	rm -f test
+	rm -f test test0
 	rm -f *.out
 	rm -f *.so
 	rm -f asm-offset.h
