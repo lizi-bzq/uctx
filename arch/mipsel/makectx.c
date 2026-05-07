@@ -1,5 +1,5 @@
-#include "uctx.h"
 #include "nostdc.h"
+#include "uctx.h"
 
 extern void __start_uctx(void) __attribute__((visibility("hidden")));
 extern void __uctx_exit(void) __attribute__((visibility("hidden")));
@@ -43,18 +43,24 @@ int makeuctx(struct uctx *ctx, void (*func)(void *), void *arg)
     */
 
     /* upper block (16 bytes) */
-    *(--sp) = (unsigned long)ctx;           /* ctx ptr          → sp+100 */
-    *(--sp) = (unsigned long)__uctx_exit;   /* (unused)         → sp+96 */
-    *(--sp) = (unsigned long)arg;           /* function argument → sp+92 */
-    *(--sp) = (unsigned long)func;          /* function pointer  → sp+88 */
+    *(--sp) = (unsigned long)ctx;         /* ctx ptr          → sp+100 */
+    *(--sp) = (unsigned long)__uctx_exit; /* (unused)         → sp+96 */
+    *(--sp) = (unsigned long)arg;         /* function argument → sp+92 */
+    *(--sp) = (unsigned long)func;        /* function pointer  → sp+88 */
 
     /* FP callee-saved: $f20-$f30 (6 doubles, 48B = 12 unsigned-long pushes) */
-    *(--sp) = 0; *(--sp) = 0; /* f30 → sp+80 */
-    *(--sp) = 0; *(--sp) = 0; /* f28 → sp+72 */
-    *(--sp) = 0; *(--sp) = 0; /* f26 → sp+64 */
-    *(--sp) = 0; *(--sp) = 0; /* f24 → sp+56 */
-    *(--sp) = 0; *(--sp) = 0; /* f22 → sp+48 */
-    *(--sp) = 0; *(--sp) = 0; /* f20 → sp+40 */
+    *(--sp) = 0;
+    *(--sp) = 0; /* f30 → sp+80 */
+    *(--sp) = 0;
+    *(--sp) = 0; /* f28 → sp+72 */
+    *(--sp) = 0;
+    *(--sp) = 0; /* f26 → sp+64 */
+    *(--sp) = 0;
+    *(--sp) = 0; /* f24 → sp+56 */
+    *(--sp) = 0;
+    *(--sp) = 0; /* f22 → sp+48 */
+    *(--sp) = 0;
+    *(--sp) = 0; /* f20 → sp+40 */
 
     /*
      * Integer callee-saved (reverse of entry.S save order):
@@ -62,16 +68,16 @@ int makeuctx(struct uctx *ctx, void (*func)(void *), void *arg)
      * __swapuctx will lw s0..s7,fp,ra from sp+0..sp+36
      * then jr $ra enters __start_uctx.
      */
-    *(--sp) = (unsigned long)__start_uctx;  /* ra               → sp+36 */
-    *(--sp) = 0; /* fp                      → sp+32 */
-    *(--sp) = 0; /* s7                      → sp+28 */
-    *(--sp) = 0; /* s6                      → sp+24 */
-    *(--sp) = 0; /* s5                      → sp+20 */
-    *(--sp) = 0; /* s4                      → sp+16 */
-    *(--sp) = 0; /* s3                      → sp+12 */
-    *(--sp) = 0; /* s2                      → sp+8 */
-    *(--sp) = 0; /* s1                      → sp+4 */
-    *(--sp) = 0; /* s0                      → sp+0 */
+    *(--sp) = (unsigned long)__start_uctx; /* ra               → sp+36 */
+    *(--sp) = 0;                           /* fp                      → sp+32 */
+    *(--sp) = 0;                           /* s7                      → sp+28 */
+    *(--sp) = 0;                           /* s6                      → sp+24 */
+    *(--sp) = 0;                           /* s5                      → sp+20 */
+    *(--sp) = 0;                           /* s4                      → sp+16 */
+    *(--sp) = 0;                           /* s3                      → sp+12 */
+    *(--sp) = 0;                           /* s2                      → sp+8 */
+    *(--sp) = 0;                           /* s1                      → sp+4 */
+    *(--sp) = 0;                           /* s0                      → sp+0 */
 
     ctx->sp = (unsigned long)sp;
     ctx->__alive = 1;

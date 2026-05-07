@@ -1,5 +1,5 @@
-#include "uctx.h"
 #include "nostdc.h"
+#include "uctx.h"
 
 extern void __start_uctx(void) __attribute__((visibility("hidden")));
 extern void __uctx_exit(void) __attribute__((visibility("hidden")));

@@ -1,5 +1,5 @@
-#include "uctx.h"
 #include "nostdc.h"
+#include "uctx.h"
 
 extern void __start_uctx(void) __attribute__((visibility("hidden")));
 extern void __uctx_exit(void) __attribute__((visibility("hidden")));
@@ -48,23 +48,18 @@ int makeuctx(struct uctx *ctx, void (*func)(void *), void *arg)
 
     /* Fill the stack frame using inline assembly to prevent compiler
        from optimizing the stores into stp with a different base address */
-    __asm__ volatile(
-        "stp %[arg], %[ctx], [%[sp], #104]\n\t"
-        "stp %[start], %[func], [%[sp], #88]\n\t"
-        "stp xzr, xzr, [%[sp], #72]\n\t"
-        "stp xzr, xzr, [%[sp], #56]\n\t"
-        "stp xzr, xzr, [%[sp], #40]\n\t"
-        "stp xzr, xzr, [%[sp], #24]\n\t"
-        "stp xzr, xzr, [%[sp], #8]\n\t"
-        "str xzr, [%[sp]]\n\t"
-        :
-        : [sp] "r" (sp),
-          [ctx] "r" ((unsigned long)ctx),
-          [arg] "r" ((unsigned long)arg),
-          [func] "r" ((unsigned long)func),
-          [start] "r" ((unsigned long)__start_uctx)
-        : "memory"
-    );
+    __asm__ volatile("stp %[arg], %[ctx], [%[sp], #104]\n\t"
+                     "stp %[start], %[func], [%[sp], #88]\n\t"
+                     "stp xzr, xzr, [%[sp], #72]\n\t"
+                     "stp xzr, xzr, [%[sp], #56]\n\t"
+                     "stp xzr, xzr, [%[sp], #40]\n\t"
+                     "stp xzr, xzr, [%[sp], #24]\n\t"
+                     "stp xzr, xzr, [%[sp], #8]\n\t"
+                     "str xzr, [%[sp]]\n\t"
+                     :
+                     : [sp] "r"(sp), [ctx] "r"((unsigned long)ctx), [arg] "r"((unsigned long)arg),
+                       [func] "r"((unsigned long)func), [start] "r"((unsigned long)__start_uctx)
+                     : "memory");
 
     ctx->sp = (unsigned long)sp;
     ctx->__alive = 1;

@@ -1,5 +1,5 @@
-#include "uctx.h"
 #include "nostdc.h"
+#include "uctx.h"
 
 #define DEFINE(sym, val) asm volatile("\n.ascii \"->" #sym " %0 " #val "\"" : : "i"(val))
 #define OFFSET(sym, str, mem) DEFINE(sym, offsetof(struct str, mem))

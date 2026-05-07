@@ -1,0 +1,3 @@
+---
+# 基于 LLVM 风格，这是 LLVM 项目本身的编码规范，适合大多数 C++ 项目。
+BasedOnStyle: Microsoft

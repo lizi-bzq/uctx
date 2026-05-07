@@ -1,5 +1,5 @@
-#include "uctx.h"
 #include "nostdc.h"
+#include "uctx.h"
 
 extern void __start_uctx(void) __attribute__((visibility("hidden")));
 extern void __uctx_exit(void) __attribute__((visibility("hidden")));
@@ -58,18 +58,18 @@ int makeuctx(struct uctx *ctx, void (*func)(void *), void *arg)
     *(--sp) = 0;
 
     /* integer callee-saved (reverse of restore order): s11..s0, ra */
-    *(--sp) = 0;                        /* s11 */
-    *(--sp) = 0;                        /* s10 */
-    *(--sp) = 0;                        /* s9  */
-    *(--sp) = 0;                        /* s8  */
-    *(--sp) = 0;                        /* s7  */
-    *(--sp) = 0;                        /* s6  */
-    *(--sp) = 0;                        /* s5  */
-    *(--sp) = 0;                        /* s4  */
-    *(--sp) = 0;                        /* s3  */
-    *(--sp) = 0;                        /* s2  */
-    *(--sp) = 0;                        /* s1  */
-    *(--sp) = 0;                        /* s0  */
+    *(--sp) = 0;                           /* s11 */
+    *(--sp) = 0;                           /* s10 */
+    *(--sp) = 0;                           /* s9  */
+    *(--sp) = 0;                           /* s8  */
+    *(--sp) = 0;                           /* s7  */
+    *(--sp) = 0;                           /* s6  */
+    *(--sp) = 0;                           /* s5  */
+    *(--sp) = 0;                           /* s4  */
+    *(--sp) = 0;                           /* s3  */
+    *(--sp) = 0;                           /* s2  */
+    *(--sp) = 0;                           /* s1  */
+    *(--sp) = 0;                           /* s0  */
     *(--sp) = (unsigned long)__start_uctx; /* ra */
 
     ctx->sp = (unsigned long)sp;

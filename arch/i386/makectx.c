@@ -1,5 +1,5 @@
-#include "uctx.h"
 #include "nostdc.h"
+#include "uctx.h"
 
 extern void __start_uctx(void) __attribute__((visibility("hidden")));
 extern void __uctx_exit(void) __attribute__((visibility("hidden")));
@@ -32,7 +32,7 @@ int makeuctx(struct uctx *ctx, void (*func)(void *), void *arg)
     *(--sp) = (unsigned long)arg;
     *(--sp) = (unsigned long)__uctx_exit;
     *(--sp) = (unsigned long)func;
-    *(--sp) = (unsigned long)__start_uctx;   /* ret from __swapuctx */
+    *(--sp) = (unsigned long)__start_uctx; /* ret from __swapuctx */
 
     /* callee-saved (push order: ebp,edi,esi,ebx → reverse of pop) */
     *(--sp) = 0; /* ebp */

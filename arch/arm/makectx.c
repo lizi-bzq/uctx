@@ -1,5 +1,5 @@
-#include "uctx.h"
 #include "nostdc.h"
+#include "uctx.h"
 
 extern void __start_uctx(void) __attribute__((visibility("hidden")));
 extern void __uctx_exit(void) __attribute__((visibility("hidden")));
@@ -36,37 +36,45 @@ int makeuctx(struct uctx *ctx, void (*func)(void *), void *arg)
     */
 
     /* upper block (16 bytes) */
-    *(--sp) = (unsigned long)ctx;           /* ctx ptr          → sp+12 */
-    *(--sp) = (unsigned long)__uctx_exit;   /* (unused)         → sp+8  */
-    *(--sp) = (unsigned long)arg;           /* function argument → sp+4  */
-    *(--sp) = (unsigned long)func;          /* function pointer  → sp+0  */
+    *(--sp) = (unsigned long)ctx;         /* ctx ptr          → sp+12 */
+    *(--sp) = (unsigned long)__uctx_exit; /* (unused)         → sp+8  */
+    *(--sp) = (unsigned long)arg;         /* function argument → sp+4  */
+    *(--sp) = (unsigned long)func;        /* function pointer  → sp+0  */
 
     /*
      * VFP callee-saved: d8-d15 (8 doubles × 8B = 64B = 16 unsigned-long pushes).
      * Emulate vpush order: d15 first (highest addr), d8 last.
      */
-    *(--sp) = 0; *(--sp) = 0; /* d15 */
-    *(--sp) = 0; *(--sp) = 0; /* d14 */
-    *(--sp) = 0; *(--sp) = 0; /* d13 */
-    *(--sp) = 0; *(--sp) = 0; /* d12 */
-    *(--sp) = 0; *(--sp) = 0; /* d11 */
-    *(--sp) = 0; *(--sp) = 0; /* d10 */
-    *(--sp) = 0; *(--sp) = 0; /* d9  */
-    *(--sp) = 0; *(--sp) = 0; /* d8  */
+    *(--sp) = 0;
+    *(--sp) = 0; /* d15 */
+    *(--sp) = 0;
+    *(--sp) = 0; /* d14 */
+    *(--sp) = 0;
+    *(--sp) = 0; /* d13 */
+    *(--sp) = 0;
+    *(--sp) = 0; /* d12 */
+    *(--sp) = 0;
+    *(--sp) = 0; /* d11 */
+    *(--sp) = 0;
+    *(--sp) = 0; /* d10 */
+    *(--sp) = 0;
+    *(--sp) = 0; /* d9  */
+    *(--sp) = 0;
+    *(--sp) = 0; /* d8  */
 
     /*
      * Integer callee-saved: lr (__start_uctx), r11..r4 = 0.
      * Emulate push {r4-r11,lr} order: lr first, r4 last.
      */
-    *(--sp) = (unsigned long)__start_uctx;  /* lr               → sp+80 */
-    *(--sp) = 0; /* r11 */
-    *(--sp) = 0; /* r10 */
-    *(--sp) = 0; /* r9  */
-    *(--sp) = 0; /* r8  */
-    *(--sp) = 0; /* r7  */
-    *(--sp) = 0; /* r6  */
-    *(--sp) = 0; /* r5  */
-    *(--sp) = 0; /* r4  */
+    *(--sp) = (unsigned long)__start_uctx; /* lr               → sp+80 */
+    *(--sp) = 0;                           /* r11 */
+    *(--sp) = 0;                           /* r10 */
+    *(--sp) = 0;                           /* r9  */
+    *(--sp) = 0;                           /* r8  */
+    *(--sp) = 0;                           /* r7  */
+    *(--sp) = 0;                           /* r6  */
+    *(--sp) = 0;                           /* r5  */
+    *(--sp) = 0;                           /* r4  */
 
     ctx->sp = (unsigned long)sp;
     ctx->__alive = 1;
