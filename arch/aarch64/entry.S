@@ -45,5 +45,5 @@ __start_uctx:
 .type __uctx_exit, @function
 __uctx_exit:
     /* the uctx */
-    ldr x0, [sp], #8
+    ldr x0, [sp]
     b uctx_exit

@@ -14,9 +14,8 @@ ARCH_DIR := arch/arm
 endif
 
 # Object files in arch-specific subdirectory to avoid cross-contamination
-C_SRCS = $(ARCH_DIR)/uctx.c
-C_SRCS += $(ARCH_DIR)/makectx.c
-C_OBJS = $(C_SRCS:.c=.o)
+C_OBJS = $(ARCH_DIR)/uctx.o
+C_OBJS += $(ARCH_DIR)/makectx.o
 C_OBJS += $(ARCH_DIR)/entry.o
 
 # Common flags
